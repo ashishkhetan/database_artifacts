@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: employees_db
     volumes:
-      - ./init-db1:/docker-entrypoint-initdb.d
+      - ./test_databases/db1:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
 
@@ -18,7 +18,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: orders_db
     volumes:
-      - ./init-db2:/docker-entrypoint-initdb.d
+      - ./test_databases/db2:/docker-entrypoint-initdb.d
     ports:
       - "5433:5432"
 

@@ -2,19 +2,19 @@
     "databases": [
         {
             "name": "employees_db",
+            "endpoint_rw": "db1",
+            "port": 5432,
             "database": "employees_db",
             "username": "postgres",
-            "password": "postgres",
-            "endpoint_rw": "db1",
-            "port": 5432
+            "password": "postgres"
         },
         {
-            "name": "orders_db", 
+            "name": "orders_db",
+            "endpoint_rw": "db2",
+            "port": 5432,
             "database": "orders_db",
             "username": "postgres",
-            "password": "postgres",
-            "endpoint_rw": "db2",
-            "port": 5432
+            "password": "postgres"
         }
     ]
 }
