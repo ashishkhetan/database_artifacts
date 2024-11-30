@@ -21,5 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Add src directory to Python path
+ENV PYTHONPATH=/app/src
+
 # Command to run the script
-CMD ["python", "data_dictionary.py"]
+CMD ["python", "-m", "generators.data_dictionary"]
