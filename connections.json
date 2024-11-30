@@ -1,0 +1,20 @@
+{
+    "databases": [
+        {
+            "name": "employees_db",
+            "database": "employees_db",
+            "username": "postgres",
+            "password": "postgres",
+            "endpoint_rw": "db1",
+            "port": 5432
+        },
+        {
+            "name": "orders_db", 
+            "database": "orders_db",
+            "username": "postgres",
+            "password": "postgres",
+            "endpoint_rw": "db2",
+            "port": 5432
+        }
+    ]
+}
