@@ -44,6 +44,9 @@ data_dictionary/
 *.pdf
 *.xlsx
 
+# Configuration with sensitive data
+config/confluence_config.json
+
 # Logs
 *.log
 logs/
