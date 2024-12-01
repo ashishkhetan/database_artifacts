@@ -1,0 +1,17 @@
+{
+    "url": "https://your-domain.atlassian.net",
+    "username": "your-email@domain.com",
+    "api_token": "your-api-token",
+    "space_key": "SPACE",
+    "page_title": "Database Documentation",
+    "comment": [
+        "Instructions:",
+        "1. Copy this file to confluence_config.json",
+        "2. Replace the placeholder values with your actual Confluence credentials",
+        "3. Generate an API token from https://id.atlassian.com/manage-profile/security/api-tokens",
+        "4. The space_key is the key of your Confluence space where docs will be published",
+        "5. The page_title is the fixed title for the documentation page",
+        "6. The URL should be your Atlassian domain without /wiki/rest/api",
+        "Note: confluence_config.json is gitignored to protect sensitive credentials"
+    ]
+}
