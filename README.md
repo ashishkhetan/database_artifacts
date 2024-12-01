@@ -1,164 +1,119 @@
 # Database Documentation Generator
 
-A utility to generate and publish comprehensive database documentation including data dictionaries and schema diagrams for PostgreSQL databases.
+Automatically generates and publishes database documentation including schema diagrams and data dictionaries to Confluence.
 
 ## Features
 
-- Generate detailed Excel-based data dictionaries
-- Create ERD diagrams for database schemas
+- Schema diagram generation (PNG and PDF)
+- Data dictionary generation (Excel)
+- Automated Confluence publishing
+- Comprehensive logging
+- Error handling and recovery
 - Support for multiple databases and schemas
-- Configurable through JSON connection files
-- Automatic publishing to Confluence with retention policies:
-  * Weekly versions: Keeps last 4 weeks
-  * Monthly versions: Keeps last 6 months
-  * Quarterly versions: Keeps last 4 quarters
 
-## Installation
+## Project Structure
 
-1. Ensure you have Docker installed
-2. Clone this repository
-3. Build the Docker image:
-```bash
-docker-compose build
+```
+.
+├── config/
+│   ├── confluence_config.json     # Confluence connection settings
+│   └── connections.json          # Database connection settings
+├── src/
+│   ├── generators/
+│   │   ├── schema.py            # Generates ERD diagrams
+│   │   └── data_dictionary.py   # Generates Excel documentation
+│   ├── publishers/
+│   │   └── confluence.py        # Publishes to Confluence
+│   └── utils/
+│       └── db.py               # Database utilities
+├── output/                     # Generated documentation
+│   └── {database_name}/       # Per-database outputs
+├── logs/                      # Log files
+├── test_databases/            # Test database init scripts
+├── docker-compose.yml         # Docker configuration
+├── Dockerfile                 # Container definition
+├── generate_docs.bat          # Main execution script
+└── requirements.txt           # Python dependencies
 ```
 
-## Configuration
+## Setup
 
-### Database Connections
+1. Configure database connections in `config/connections.json`:
+   ```json
+   {
+     "databases": [
+       {
+         "name": "database_name",
+         "endpoint_rw": "hostname",
+         "port": 5432,
+         "database": "dbname",
+         "username": "user",
+         "password": "pass"
+       }
+     ]
+   }
+   ```
 
-Create a `connections.json` file with your database connection details:
-
-```json
-{
-    "databases": [
-        {
-            "name": "employees_db",
-            "database": "employees",
-            "username": "postgres",
-            "password": "password",
-            "endpoint_rw": "db1",
-            "port": 5432
-        },
-        {
-            "name": "orders_db",
-            "database": "orders",
-            "username": "postgres",
-            "password": "password",
-            "endpoint_rw": "db2",
-            "port": 5432
-        }
-    ]
-}
-```
-
-### Confluence Configuration
-
-Create a `confluence_config.json` file for Confluence integration:
-
-```json
-{
-    "url": "https://your-domain.atlassian.net",
-    "username": "your-email@domain.com",
-    "api_token": "your-api-token",
-    "space_key": "SPACE"
-}
-```
-
-To get an API token:
-1. Log in to https://id.atlassian.com/manage/api-tokens
-2. Click "Create API token"
-3. Copy the token and paste it in your configuration file
+2. Configure Confluence settings in `config/confluence_config.json`:
+   ```json
+   {
+     "url": "https://your-domain.atlassian.net",
+     "username": "your-email@domain.com",
+     "api_token": "your-api-token",
+     "space_key": "SPACE",
+     "parent_page_id": "12345"
+   }
+   ```
 
 ## Usage
 
-### Generate Documentation
+### Manual Execution
 
-1. Generate both data dictionary and schema diagrams:
+Run the documentation generator:
 ```bash
-docker-compose run --rm datadictionary python data_dictionary.py --type all
+.\generate_docs.bat
 ```
 
-2. Generate only data dictionary:
+The script will:
+1. Generate schema diagrams (PNG/PDF)
+2. Create data dictionaries (Excel)
+3. Publish everything to Confluence
+4. Save logs to `logs/generate_docs_TIMESTAMP.log`
+
+### Automated Execution
+
+Schedule with Windows Task Scheduler:
+1. Program/script: `C:\Windows\System32\cmd.exe`
+2. Arguments: `/c "cd /d PATH_TO_PROJECT && generate_docs.bat"`
+3. Start in: `PATH_TO_PROJECT`
+
+### Development/Testing
+
+To run with test databases:
 ```bash
-docker-compose run --rm datadictionary python data_dictionary.py --type dictionary
+docker-compose --profile test up -d
 ```
 
-3. Generate only schema diagrams:
-```bash
-docker-compose run --rm datadictionary python data_dictionary.py --type schema
-```
+This will start PostgreSQL containers with sample databases for testing.
 
-### Publish to Confluence
+## Output
 
-Generate and publish documentation:
-```bash
-docker-compose run --rm datadictionary python data_dictionary.py --type all --publish
-```
+1. Schema Diagrams:
+   - `output/{database_name}/{schema_name}_schema.png`
+   - `output/{database_name}/{schema_name}_schema.pdf`
 
-You can also specify custom configuration files:
-```bash
-docker-compose run --rm datadictionary python data_dictionary.py --type all --publish \
-    --connection-file my_connections.json \
-    --confluence-config my_confluence_config.json \
-    --output-dir documentation
-```
+2. Data Dictionaries:
+   - `output/{database_name}/{database_name}_data_dictionary.xlsx`
 
-### Automation
+3. Log Files:
+   - `logs/generate_docs_TIMESTAMP.log`
+   - Logs are automatically cleaned up after 7 days
 
-To automate weekly documentation updates, you can set up a cron job or scheduled task:
+## Error Handling
 
-#### Linux Cron Example
-```bash
-# Run every Monday at 2 AM
-0 2 * * 1 cd /path/to/project && docker-compose run --rm datadictionary python data_dictionary.py --type all --publish
-```
-
-#### Windows Task Scheduler
-Create a batch file `update_docs.bat`:
-```batch
-cd C:\path\to\project
-docker-compose run --rm datadictionary python data_dictionary.py --type all --publish
-```
-Then schedule it to run weekly using Task Scheduler.
-
-## Output Structure
-
-### Local Files
-
-The utility creates a directory structure like this:
-
-```
-output_dir/
-├── database1/
-│   ├── database1_data_dictionary.xlsx
-│   └── schema1_schema.png
-└── database2/
-    ├── database2_data_dictionary.xlsx
-    └── schema2_schema.png
-```
-
-### Confluence Pages
-
-For each database, the utility creates:
-- A new page with the current timestamp
-- Attachments for all generated files
-- Automatic cleanup of old versions based on retention policy:
-  * Keeps the last 4 weekly versions
-  * Keeps the last 6 monthly versions
-  * Keeps the last 4 quarterly versions
-
-### Data Dictionary Excel Format
-
-Each Excel file contains multiple sheets:
-- Tables: List of all tables with descriptions
-- Columns: Detailed column information including data types and constraints
-- Constraints: Table constraints (PRIMARY KEY, FOREIGN KEY, etc.)
-- Indexes: Table indexes and their definitions
-
-### Schema Diagrams
-
-ERD diagrams are generated in PNG format showing:
-- Tables and their columns
-- Primary keys
-- Foreign key relationships
-- Data types
+The system includes comprehensive error handling:
+- Connection testing before processing
+- Per-database error isolation
+- Detailed error logging
+- Automatic recovery and continuation
+- Clear error messages and suggestions
