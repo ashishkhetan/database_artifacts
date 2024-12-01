@@ -1,31 +1,36 @@
-version: '3'
+version: '3.8'
+
 services:
-  db1:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: employees_db
-    volumes:
-      - ./test_databases/db1:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-
-  db2:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: orders_db
-    volumes:
-      - ./test_databases/db2:/docker-entrypoint-initdb.d
-    ports:
-      - "5433:5432"
-
   datadictionary:
     build: .
     volumes:
       - .:/app
-    depends_on:
-      - db1
-      - db2
+    environment:
+      - PYTHONPATH=/app
+
+  # Test databases - only used for development/testing
+  db1:
+    image: postgres:13
+    profiles:
+      - test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: employees_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./test_databases/db1/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  db2:
+    image: postgres:13
+    profiles:
+      - test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orders_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./test_databases/db2/init.sql:/docker-entrypoint-initdb.d/init.sql
