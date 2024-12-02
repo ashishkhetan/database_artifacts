@@ -75,10 +75,11 @@ Run the documentation generator:
 ```
 
 The script will:
-1. Generate schema diagrams (PNG/PDF)
-2. Create data dictionaries (Excel)
-3. Publish everything to Confluence
-4. Save logs to `logs/generate_docs_TIMESTAMP.log`
+1. Clean the output directory
+2. Generate schema diagrams (PNG/PDF)
+3. Create data dictionaries (Excel)
+4. Publish everything to Confluence
+5. Save logs to `logs/generate_docs_TIMESTAMP.log`
 
 ### Automated Execution
 
@@ -117,3 +118,11 @@ The system includes comprehensive error handling:
 - Detailed error logging
 - Automatic recovery and continuation
 - Clear error messages and suggestions
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Ashish Khaitan

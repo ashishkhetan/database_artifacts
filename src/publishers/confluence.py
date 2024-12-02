@@ -6,6 +6,7 @@ import requests
 from atlassian import Confluence
 import logging
 import sys
+from collections import defaultdict
 
 # Configure logging to output to both file and console
 logging.basicConfig(
@@ -117,7 +118,9 @@ class ConfluencePublisher:
                 self.confluence.update_page(
                     page_id=existing_page['id'],
                     title=title,
-                    body=body
+                    body=body,
+                    type='page',
+                    representation='storage'
                 )
                 return existing_page['id']
             else:
@@ -126,7 +129,9 @@ class ConfluencePublisher:
                     space=space_key,
                     title=title,
                     body=body,
-                    parent_id=None  # Create at root level
+                    parent_id=None,  # Create at root level
+                    type='page',
+                    representation='storage'
                 )
                 return page['id']
         except Exception as e:
@@ -154,10 +159,10 @@ class ConfluencePublisher:
             
             # Start building the page content
             body = f"""
-            <h1>{title}</h1>
+            <h1>Database Documentation</h1>
             <p>Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
             
-            <ac:structured-macro ac:name="info">
+            <ac:structured-macro ac:name="info" ac:schema-version="1">
                 <ac:rich-text-body>
                     <p>This page contains documentation for all databases including schema diagrams and data dictionaries.</p>
                     <p>Documentation is automatically generated and updated regularly.</p>
@@ -195,7 +200,8 @@ class ConfluencePublisher:
                     self._attach_file(page_id, data_dict_file)
                 
                 # Process each schema
-                for schema_name, files in schema_files.items():
+                num_schemas = len(schema_files)
+                for i, (schema_name, files) in enumerate(schema_files.items()):
                     # Attach files first
                     if files['png']:
                         png_path = doc_path / files['png']
@@ -206,9 +212,16 @@ class ConfluencePublisher:
                         self._attach_file(page_id, pdf_path)
                     
                     # Add row to table
+                    body += "<tr>"
+                    
+                    # Database column with rowspan for first schema only
+                    if i == 0:
+                        body += f"""
+                        <td rowspan="{num_schemas}">{db_name}</td>
+                        """
+                    
+                    # Schema info
                     body += f"""
-                    <tr>
-                        <td>{db_name}</td>
                         <td>{schema_name.upper()}</td>
                         <td>
                             <ac:image ac:thumbnail="true" ac:width="200">
@@ -221,14 +234,20 @@ class ConfluencePublisher:
                                 <ac:plain-text-link-body>View Schema (PDF)</ac:plain-text-link-body>
                             </ac:link>
                         </td>
-                        <td>
+                    """
+                    
+                    # Data dictionary column with rowspan for first schema only
+                    if i == 0:
+                        body += f"""
+                        <td rowspan="{num_schemas}">
                             <ac:link>
                                 <ri:attachment ri:filename="{db_name}_data_dictionary.xlsx" />
                                 <ac:plain-text-link-body>View Data Dictionary (Excel)</ac:plain-text-link-body>
                             </ac:link>
                         </td>
-                    </tr>
-                    """
+                        """
+                    
+                    body += "</tr>"
             
             # Close the table
             body += "</table>"
@@ -246,7 +265,9 @@ class ConfluencePublisher:
             self.confluence.update_page(
                 page_id=page_id,
                 title=title,
-                body=body
+                body=body,
+                type='page',
+                representation='storage'
             )
             
             logger.info("Successfully published documentation")

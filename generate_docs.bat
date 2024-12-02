@@ -25,6 +25,14 @@ if %errorlevel% neq 0 (
 :: Set working directory to script location
 cd /d %~dp0
 
+:: Clean output directory
+echo Cleaning output directory... >> "%logfile%"
+echo Cleaning output directory...
+if exist output (
+    rmdir /s /q output
+)
+mkdir output
+
 echo. >> "%logfile%"
 echo Step 1: Running schema generator... >> "%logfile%"
 echo Running schema generator...
